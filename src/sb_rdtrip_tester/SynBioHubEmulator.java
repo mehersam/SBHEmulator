@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.IOUtils;
 import net.sf.json.JSONObject; 
 import javax.xml.namespace.QName;
@@ -36,6 +38,13 @@ public class SynBioHubEmulator {
 	private Config config; //this needs an empty constructor with some default values i.e prefix, etc..?
 	private File input_file; 
 
+	private long submitStartTime; 
+	private long submitEndTime ; 
+	private long retrieveStartTime; 
+	private long retrieveEndTime; 
+	private long emulateStartTime; 
+	private long emulateEndTime; 
+	
 	public SynBioHubEmulator(File read_file) throws SBOLValidationException, IOException, SBOLConversionException,
 			SynBioHubException, URISyntaxException {
 		
@@ -48,11 +57,22 @@ public class SynBioHubEmulator {
 			//read in the input file as an SBOLDocument to submit to SBH
 			create_design(config.get_prefix(), input_file, config.get_complete(), config.get_defaults());
 			
+			submitStartTime = System.currentTimeMillis();
 			// submit document to SBH
 			hub.createCollection(config.get_id(), config.get_version(), config.get_name(), config.get_desc(), "", true, doc);
-
+			
+			submitEndTime = System.currentTimeMillis();
+			
+			System.out.println("Submit Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((submitEndTime - submitStartTime)));
+			
+			retrieveStartTime = System.currentTimeMillis();
 			//retrieve uploaded document from SBH
 			retrievedDoc = hub.getSBOL(config.get_TP_col());
+			
+			retrieveEndTime = System.currentTimeMillis();
+			
+			System.out.println("Doc Retrieval Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((retrieveEndTime - retrieveStartTime)));
+
 		}
 		
 	}
@@ -81,9 +101,13 @@ public class SynBioHubEmulator {
 		String newPrefix = config.get_prefix() + "/user/" + config.get_user() + "/" + config.get_id() + "/";
 		
 		//attempt to emulate the changes 
+		emulateStartTime = System.currentTimeMillis();
 		doc = emulator(doc, newPrefix, config.get_TP_col());
+		emulateEndTime = System.currentTimeMillis();
 		doc = ack_changes(doc, retrieveDoc(), newPrefix, config.get_TP_col());
-		
+
+		System.out.println("Emulation Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((emulateEndTime - emulateStartTime)));
+
 		return doc;
 	}
 	
