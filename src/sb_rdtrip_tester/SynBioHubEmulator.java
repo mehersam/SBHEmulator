@@ -1,8 +1,10 @@
 package sb_rdtrip_tester;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,7 +39,7 @@ public class SynBioHubEmulator {
 	private SBOLDocument retrievedDoc;
 	private Config config; //this needs an empty constructor with some default values i.e prefix, etc..?
 	private File input_file; 
-
+	private BufferedWriter bw; 
 	private long submitStartTime; 
 	private long submitEndTime ; 
 	private long retrieveStartTime; 
@@ -51,6 +53,8 @@ public class SynBioHubEmulator {
 		input_file = read_file; 
 		config = parse_JSON(); //read in settings file
 		
+		File timing = new File(read_file.getName().replace(".xml", "") + "_timing.txt");
+		bw = new BufferedWriter(new FileWriter(timing));
 		//create an instance of SBH and login
 		if(initialize_SBH_Frontend(config.get_url(), config.get_prefix(), config.get_email(), config.get_pass()))
 		{
@@ -63,7 +67,8 @@ public class SynBioHubEmulator {
 			
 			submitEndTime = System.currentTimeMillis();
 			
-			System.out.println("Submit Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((submitEndTime - submitStartTime)));
+			bw.write("Submit Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((submitEndTime - submitStartTime)));
+			bw.write("\n");
 			
 			retrieveStartTime = System.currentTimeMillis();
 			//retrieve uploaded document from SBH
@@ -71,8 +76,8 @@ public class SynBioHubEmulator {
 			
 			retrieveEndTime = System.currentTimeMillis();
 			
-			System.out.println("Doc Retrieval Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((retrieveEndTime - retrieveStartTime)));
-
+			bw.write("Doc Retrieval Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((retrieveEndTime - retrieveStartTime)));
+			bw.write("\n");
 		}
 		
 	}
@@ -97,7 +102,7 @@ public class SynBioHubEmulator {
 	 * @return SBOLDocument : the emulated SBOLDocument
 	 * 
 	 */
-	public SBOLDocument retrieveEmulatedDoc() throws SynBioHubException, SBOLValidationException, URISyntaxException {
+	public SBOLDocument retrieveEmulatedDoc() throws SynBioHubException, SBOLValidationException, URISyntaxException, IOException {
 		String newPrefix = config.get_prefix() + "/user/" + config.get_user() + "/" + config.get_id() + "/";
 		
 		//attempt to emulate the changes 
@@ -106,8 +111,8 @@ public class SynBioHubEmulator {
 		emulateEndTime = System.currentTimeMillis();
 		doc = ack_changes(doc, retrieveDoc(), newPrefix, config.get_TP_col());
 
-		System.out.println("Emulation Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((emulateEndTime - emulateStartTime)));
-
+		bw.write("Emulation Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((emulateEndTime - emulateStartTime)));
+		bw.close();
 		return doc;
 	}
 	
