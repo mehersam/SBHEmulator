@@ -285,13 +285,14 @@ public class SynBioHubEmulator {
 		InputStream is = null;
 		String jsonTxt = null; 
 		try {
-			f = new File(SynBioHubEmulator.class.getResource("Emulator_Settings.txt").toURI());
+		    f = new File("/Users/myers/git/SynBioHubRunner/src/sb_rdtrip_tester/Emulator_Settings.txt");
+			//			f = new File(SynBioHubEmulator.class.getResource("Emulator_Settings.txt").toURI());
 			is = new FileInputStream(f);
 			jsonTxt = IOUtils.toString(is, "UTF-8");
-		} catch (URISyntaxException e) {
+		} /*catch (URISyntaxException e) {
 			System.err.println("The file URI could not be created: " + e.getMessage()); 
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
+			} */catch (FileNotFoundException e) {
 			System.err.println("The file URI could not be found: " + e.getMessage()); 
 			e.printStackTrace();
 		} catch (IOException e) {
