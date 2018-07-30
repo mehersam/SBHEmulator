@@ -42,10 +42,25 @@ public class SynBioHubEmulator {
 	private BufferedWriter bw; 
 	private long submitStartTime; 
 	private long submitEndTime ; 
+	private double submitDuration;
 	private long retrieveStartTime; 
 	private long retrieveEndTime; 
+	private double retrieveDuration;
 	private long emulateStartTime; 
 	private long emulateEndTime; 
+	private double emulateDuration;
+	private long removeStartTime; 
+	private long removeEndTime; 
+	private double removeDuration;
+	private long addTopStartTime; 
+	private long addTopEndTime; 
+	private double addTopDuration;
+	private long uriUpdateStartTime; 
+	private long uriUpdateEndTime; 
+	private double uriUpdateDuration;
+	private long annotateStartTime; 
+	private long annotateEndTime; 
+	private double annotateDuration;
 	
 	public SynBioHubEmulator(File read_file) throws SBOLValidationException, IOException, SBOLConversionException,
 			SynBioHubException, URISyntaxException {
@@ -53,7 +68,7 @@ public class SynBioHubEmulator {
 		input_file = read_file; 
 		config = parse_JSON(); //read in settings file
 		
-		File timing = new File(read_file.getName().replace(".xml", "") + "_timing.txt");
+		File timing = new File("Timing/"+read_file.getName().replace(".xml", "") + "_timing.txt");
 		bw = new BufferedWriter(new FileWriter(timing));
 		//create an instance of SBH and login
 		if(initialize_SBH_Frontend(config.get_url(), config.get_prefix(), config.get_email(), config.get_pass()))
@@ -66,8 +81,9 @@ public class SynBioHubEmulator {
 			hub.createCollection(config.get_id(), config.get_version(), config.get_name(), config.get_desc(), "", true, doc);
 			
 			submitEndTime = System.currentTimeMillis();
-			
-			bw.write("Submit Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((submitEndTime - submitStartTime)));
+			submitDuration = (submitEndTime - submitStartTime) * 1.0 / 1000;
+
+			bw.write("Submit Time (in sec): " + submitDuration);
 			bw.write("\n");
 			
 			retrieveStartTime = System.currentTimeMillis();
@@ -75,8 +91,9 @@ public class SynBioHubEmulator {
 			retrievedDoc = hub.getSBOL(config.get_TP_col());
 			
 			retrieveEndTime = System.currentTimeMillis();
-			
-			bw.write("Doc Retrieval Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((retrieveEndTime - retrieveStartTime)));
+			retrieveDuration = (retrieveEndTime - retrieveStartTime) * 1.0 / 1000;
+
+			bw.write("Doc Retrieval Time (in sec): " + retrieveDuration);
 			bw.write("\n");
 		}
 		
@@ -106,12 +123,21 @@ public class SynBioHubEmulator {
 		String newPrefix = config.get_prefix() + "/user/" + config.get_user() + "/" + config.get_id() + "/";
 		
 		//attempt to emulate the changes 
-		emulateStartTime = System.currentTimeMillis();
 		doc = emulator(doc, newPrefix, config.get_TP_col());
-		emulateEndTime = System.currentTimeMillis();
 		doc = ack_changes(doc, retrieveDoc(), newPrefix, config.get_TP_col());
 
-		bw.write("Emulation Time (in sec): " + TimeUnit.MILLISECONDS.toSeconds((emulateEndTime - emulateStartTime)));
+		bw.write("Emulation Time (in sec): " + emulateDuration);
+		bw.write("\n");
+		bw.write("    Remove Time (in sec): " + removeDuration);
+		bw.write("\n");
+		bw.write("    Change URI Prefix Time (in sec): " + uriUpdateDuration);
+		bw.write("\n");
+		bw.write("    Add Collection Time (in sec): " + addTopDuration);
+		bw.write("\n");
+		bw.write("    Add Annotations Time (in sec): " + annotateDuration);
+		bw.write("\n");
+		bw.write("libSBOLj (%): " + emulateDuration / submitDuration * 100);
+		bw.write("\n");
 		bw.close();
 		return doc;
 	}
@@ -151,9 +177,12 @@ public class SynBioHubEmulator {
 	private SBOLDocument emulator(SBOLDocument doc, String newPrefix, URI topLevelURI)
 			throws SBOLValidationException, URISyntaxException, SynBioHubException {
 
-		// CHANGE 0: remove objects found in WebOfRegistries
 		ArrayList<WebOfRegistriesData> webOfRegistries = SynBioHubFrontend.getRegistries();
-		
+
+		emulateStartTime = System.currentTimeMillis();
+
+		// CHANGE 1: remove objects found in WebOfRegistries
+		removeStartTime = System.currentTimeMillis();
 		for (TopLevel tp : doc.getTopLevels()) {
 			for (WebOfRegistriesData registry : webOfRegistries) {
 				if (tp.getIdentity().toString().startsWith(registry.getUriPrefix())) {
@@ -161,16 +190,19 @@ public class SynBioHubEmulator {
 				}
 			}
 		}
+		removeEndTime = System.currentTimeMillis();
+		removeDuration = (removeEndTime - removeStartTime) * 1.0 / 1000;
 		
-		// CHANGE 1: change URI prefix	
+		// CHANGE 2: change URI prefix	
+		uriUpdateStartTime = System.currentTimeMillis();
 		doc.setDefaultURIprefix("http://dummy.org");
 		doc = doc.changeURIPrefixVersion(newPrefix, null, "1");
 		doc.setDefaultURIprefix(newPrefix);
+		uriUpdateEndTime = System.currentTimeMillis();
+		uriUpdateDuration = (uriUpdateEndTime - uriUpdateStartTime) * 1.0 / 1000;
 
-		// CHANGE 2: add owned by annotation to Collection
-		final String ownedByURI = config.get_prefix() + "/user/" + config.get_user();
-
-		// CHANGE 4: add top level collection
+		// CHANGE 3: add top level collection
+		addTopStartTime = System.currentTimeMillis();
 		Collection c = doc.createCollection("Tester_1_collection", "1");
 
 		String name = config.get_name();
@@ -183,7 +215,12 @@ public class SynBioHubEmulator {
 			if (!tp.getIdentity().equals(c.getIdentity()))
 				c.addMember(tp.getIdentity());
 		}
+		addTopEndTime = System.currentTimeMillis();
+		addTopDuration = (addTopEndTime - addTopStartTime) * 1.0 / 1000;
 
+		// CHANGE 4: add owned by annotation to Collection
+		annotateStartTime = System.currentTimeMillis();
+		final String ownedByURI = config.get_prefix() + "/user/" + config.get_user();
 		(new IdentifiedVisitor() {
 
 			@Override
@@ -220,6 +257,11 @@ public class SynBioHubEmulator {
 			}
 
 		}).visitDocument(doc);
+		annotateEndTime = System.currentTimeMillis();
+		annotateDuration = (annotateEndTime - annotateStartTime) * 1.0 / 1000;
+
+		emulateEndTime = System.currentTimeMillis();
+		emulateDuration = (emulateEndTime - emulateStartTime) * 1.0 / 1000;
 		
 		for (WebOfRegistriesData registry : webOfRegistries) {
 			doc.addRegistry(registry.getInstanceUrl(),registry.getUriPrefix());
