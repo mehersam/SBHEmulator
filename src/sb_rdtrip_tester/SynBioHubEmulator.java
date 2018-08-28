@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -178,6 +179,7 @@ public class SynBioHubEmulator {
 			throws SBOLValidationException, URISyntaxException, SynBioHubException {
 
 		ArrayList<WebOfRegistriesData> webOfRegistries = SynBioHubFrontend.getRegistries();
+		HashSet<URI> urisFoundInSynBioHub = new HashSet<>();
 
 		emulateStartTime = System.currentTimeMillis();
 
@@ -186,6 +188,7 @@ public class SynBioHubEmulator {
 		for (TopLevel tp : doc.getTopLevels()) {
 			for (WebOfRegistriesData registry : webOfRegistries) {
 				if (tp.getIdentity().toString().startsWith(registry.getUriPrefix())) {
+					urisFoundInSynBioHub.add(tp.getIdentity());
 					doc.removeTopLevel(tp);
 				}
 			}
@@ -214,6 +217,9 @@ public class SynBioHubEmulator {
 		for (TopLevel tp : doc.getTopLevels()) {
 			if (!tp.getIdentity().equals(c.getIdentity()))
 				c.addMember(tp.getIdentity());
+		}
+		for (URI identity : urisFoundInSynBioHub) {
+			c.addMember(identity);
 		}
 		addTopEndTime = System.currentTimeMillis();
 		addTopDuration = (addTopEndTime - addTopStartTime) * 1.0 / 1000;
@@ -266,9 +272,10 @@ public class SynBioHubEmulator {
 		for (WebOfRegistriesData registry : webOfRegistries) {
 			doc.addRegistry(registry.getInstanceUrl(),registry.getUriPrefix());
 		}
-		//completeDocument(doc);
 		for (TopLevel topLevel : doc.getTopLevels()) {
-			doc.createRecursiveCopy(doc,topLevel);
+			if (topLevel instanceof Collection) {
+				((Collection) topLevel).getMembers();
+			}
 		}
 		
 		return doc;
