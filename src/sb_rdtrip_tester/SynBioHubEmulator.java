@@ -179,6 +179,19 @@ public class SynBioHubEmulator {
 			throws SBOLValidationException, URISyntaxException, SynBioHubException {
 
 		ArrayList<WebOfRegistriesData> webOfRegistries = SynBioHubFrontend.getRegistries();
+//		ArrayList<WebOfRegistriesData> webOfRegistries = new ArrayList<WebOfRegistriesData>();
+//		WebOfRegistriesData worData1 = new WebOfRegistriesData();
+//		worData1.setUriPrefix("https://synbiohub.org");
+//		worData1.setInstanceUrl("http://localhost:7777");
+//		webOfRegistries.add(worData1);
+//		WebOfRegistriesData worData2 = new WebOfRegistriesData();
+//		worData2.setUriPrefix("https://synbiohub.utah.edu");
+//		worData2.setInstanceUrl("https://synbiohub.utah.edu");
+//		webOfRegistries.add(worData2);
+//		WebOfRegistriesData worData3 = new WebOfRegistriesData();
+//		worData3.setUriPrefix("https://synbiohub.programmingbiology.org");
+//		worData3.setInstanceUrl("https://synbiohub.programmingbiology.org");
+//		webOfRegistries.add(worData3);
 		HashSet<URI> urisFoundInSynBioHub = new HashSet<>();
 
 		emulateStartTime = System.currentTimeMillis();
