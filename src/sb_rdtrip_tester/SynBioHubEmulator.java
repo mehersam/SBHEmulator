@@ -348,10 +348,10 @@ public class SynBioHubEmulator {
 	
 	private Config parse_JSON() throws URISyntaxException
 	{		
-		FileInputStream is = null;
+		InputStream is = null;
 		String jsonTxt = null; 
 		try {
-            is = SynBioHubEmulator.class.getResourceAsStream("Emulator_Settings.txt");
+            is = SynBioHubEmulator.class.getResourceAsStream("/Emulator_Settings.txt");
 			jsonTxt = IOUtils.toString(is, "UTF-8");
 		} /*catch (URISyntaxException e) {
 			System.err.println("The file URI could not be created: " + e.getMessage()); 
