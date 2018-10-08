@@ -348,13 +348,10 @@ public class SynBioHubEmulator {
 	
 	private Config parse_JSON() throws URISyntaxException
 	{		
-		File f = null;
-		InputStream is = null;
+		FileInputStream is = null;
 		String jsonTxt = null; 
 		try {
-		    f = new File("/Users/myers/git/SynBioHubRunner/src/sb_rdtrip_tester/Emulator_Settings.txt");
-			//			f = new File(SynBioHubEmulator.class.getResource("Emulator_Settings.txt").toURI());
-			is = new FileInputStream(f);
+            is = SynBioHubEmulator.class.getResourceAsStream("Emulator_Settings.txt");
 			jsonTxt = IOUtils.toString(is, "UTF-8");
 		} /*catch (URISyntaxException e) {
 			System.err.println("The file URI could not be created: " + e.getMessage()); 

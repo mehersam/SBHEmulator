@@ -90,5 +90,13 @@
 				    </configuration>
 				</plugin>
     </plugins>
+        <resources>
+            <resource>
+                <directory>src/resources</directory>
+                <includes>
+                    <include>Emulator_Settings.txt</include>
+                </includes>
+            </resource>
+        </resources>
   </build>
 </project>
