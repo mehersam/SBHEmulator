@@ -1,9 +1,9 @@
 SynBioHubRunner
 ===============
 
-SynBioHubRunner is the test runner that tests the [SynBioHub] (https://synbiohub.org/) application for compliance of the 
-[SBOL Standard] (http://sbolstandard.org/). This test runner can be run as a standalone application, but it's intended purpose 
-is to run it using the [SBOLTestRunner] (https://github.com/mehersam/SBOLTestRunner). The application follows the Complex Round-trip approach as described within the SBOLTestRunner. The application takes as input an SBOL data file and performs the data modification steps that SynBioHub performs on an imported file and outputs an emulated data file. Additionally, SynBioHubRunner also uploads the imported data file to SynBioHub and retrieves the exported data file. The purpose of this process is to then use the SBOLTestRunner to compare the two files and identify any unspecified changes and test its overall compliance of the SBOL Standard.  
+SynBioHubRunner is the test runner that tests the [SynBioHub](https://synbiohub.org/) application for compliance of the 
+[SBOL Standard](http://sbolstandard.org/). This test runner can be run as a standalone application, but it's intended purpose 
+is to run it using the [SBOLTestRunner](https://github.com/mehersam/SBOLTestRunner). The application follows the Complex Round-trip approach as described within the SBOLTestRunner. The application takes as input an SBOL data file and performs the data modification steps that SynBioHub performs on an imported file and outputs an emulated data file. Additionally, SynBioHubRunner also uploads the imported data file to SynBioHub and retrieves the exported data file. The purpose of this process is to then use the SBOLTestRunner to compare the two files and identify any unspecified changes and test its overall compliance of the SBOL Standard.  
 
 ### Retrieving SynBioHubRunner
 
