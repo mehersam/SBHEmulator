@@ -12,7 +12,7 @@ is to run it using the [SBOLTestRunner] (https://github.com/mehersam/SBOLTestRun
 3. [Clone](https://help.github.com/articles/cloning-a-repository/) the SBOLRunners GitHub repository to your machine.
 
 
-### Compiling and Packaging each Test Runner 
+### Compiling and Packaging SynBioHubRunner
 
 1. [Setup](http://maven.apache.org/download.cgi) Apache Maven. A tutorial on using Apache Maven is provided [here](http://maven.apache.org/guides/getting-started/index.html).
 
