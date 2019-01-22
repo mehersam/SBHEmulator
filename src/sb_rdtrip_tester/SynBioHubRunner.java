@@ -38,11 +38,13 @@ public class SynBioHubRunner {
 				emulated.write(emulated_file_path);
 			} catch (IOException | SBOLConversionException e) {
 				e.printStackTrace();
+                System.exit(1);
 			}
 		} catch (SBOLValidationException | IOException | SBOLConversionException | SynBioHubException
 				| URISyntaxException e) {
 			System.err.println("SBH Emulator failed to initalize" + e.getMessage() + "\n"); 
 			e.printStackTrace();
+            System.exit(1);
 		}
 		
 		System.out.println("Finished."); 
