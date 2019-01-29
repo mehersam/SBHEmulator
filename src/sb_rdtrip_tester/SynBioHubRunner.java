@@ -14,7 +14,7 @@ public class SynBioHubRunner {
 	public static void main(String[] args) {
 
 		try {
-			if (args.length != 3)
+			if (args.length < 3)
 				throw new IOException();
 		} catch (IOException e1) {
 			System.err.println("Please provide the file to read, emulated, and retrieved files' path.\n\n");
@@ -26,11 +26,15 @@ public class SynBioHubRunner {
 		File read_file = new File(orig_file);
 		String emulated_file_path = args[1];
 		String retrieved_file_path = args[2];
+		String timing_file_path = null;
+		if (args.length > 3) {
+			timing_file_path = args[3];
+		}
 		SBOLDocument retrieved; 
 		SBOLDocument emulated; 
 		
 		try {
-			SynBioHubEmulator emulator = new SynBioHubEmulator(read_file);
+			SynBioHubEmulator emulator = new SynBioHubEmulator(read_file,timing_file_path);
 			try {
 				retrieved = emulator.retrieveDoc(); 
 				retrieved.write(retrieved_file_path);

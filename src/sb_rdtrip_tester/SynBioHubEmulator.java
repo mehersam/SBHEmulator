@@ -40,7 +40,7 @@ public class SynBioHubEmulator {
 	private SBOLDocument retrievedDoc;
 	private Config config; //this needs an empty constructor with some default values i.e prefix, etc..?
 	private File input_file; 
-	private BufferedWriter bw; 
+	private BufferedWriter bw = null; 
 	private long submitStartTime; 
 	private long submitEndTime ; 
 	private double submitDuration;
@@ -63,14 +63,17 @@ public class SynBioHubEmulator {
 	private long annotateEndTime; 
 	private double annotateDuration;
 	
-	public SynBioHubEmulator(File read_file) throws SBOLValidationException, IOException, SBOLConversionException,
+	public SynBioHubEmulator(File read_file,String timing_file_path) throws SBOLValidationException, IOException, SBOLConversionException,
 			SynBioHubException, URISyntaxException {
 		
 		input_file = read_file; 
 		config = parse_JSON(); //read in settings file
 		
-		File timing = new File("Timing/"+read_file.getName().replace(".xml", "") + "_timing.txt");
-		bw = new BufferedWriter(new FileWriter(timing));
+		File timing = null;
+		if (timing_file_path!=null) {
+			timing = new File(timing_file_path);
+			bw = new BufferedWriter(new FileWriter(timing));
+		}
 		//create an instance of SBH and login
 		if(initialize_SBH_Frontend(config.get_url(), config.get_prefix(), config.get_email(), config.get_pass()))
 		{
@@ -84,18 +87,20 @@ public class SynBioHubEmulator {
 			submitEndTime = System.currentTimeMillis();
 			submitDuration = (submitEndTime - submitStartTime) * 1.0 / 1000;
 
-			bw.write("Submit Time (in sec): " + submitDuration);
-			bw.write("\n");
-			
+			if (bw!=null){
+				bw.write("Submit Time (in sec): " + submitDuration);
+				bw.write("\n");
+			}
 			retrieveStartTime = System.currentTimeMillis();
 			//retrieve uploaded document from SBH
 			retrievedDoc = hub.getSBOL(config.get_TP_col());
 			
 			retrieveEndTime = System.currentTimeMillis();
 			retrieveDuration = (retrieveEndTime - retrieveStartTime) * 1.0 / 1000;
-
-			bw.write("Doc Retrieval Time (in sec): " + retrieveDuration);
-			bw.write("\n");
+			if (bw!=null) {
+				bw.write("Doc Retrieval Time (in sec): " + retrieveDuration);
+				bw.write("\n");
+			}
 		}
 		
 	}
@@ -126,20 +131,21 @@ public class SynBioHubEmulator {
 		//attempt to emulate the changes 
 		doc = emulator(doc, newPrefix, config.get_TP_col());
 		doc = ack_changes(doc, retrieveDoc(), newPrefix, config.get_TP_col());
-
-		bw.write("Emulation Time (in sec): " + emulateDuration);
-		bw.write("\n");
-		bw.write("    Remove Time (in sec): " + removeDuration);
-		bw.write("\n");
-		bw.write("    Change URI Prefix Time (in sec): " + uriUpdateDuration);
-		bw.write("\n");
-		bw.write("    Add Collection Time (in sec): " + addTopDuration);
-		bw.write("\n");
-		bw.write("    Add Annotations Time (in sec): " + annotateDuration);
-		bw.write("\n");
-		bw.write("libSBOLj (%): " + emulateDuration / submitDuration * 100);
-		bw.write("\n");
-		bw.close();
+		if (bw!=null) {
+			bw.write("Emulation Time (in sec): " + emulateDuration);
+			bw.write("\n");
+			bw.write("    Remove Time (in sec): " + removeDuration);
+			bw.write("\n");
+			bw.write("    Change URI Prefix Time (in sec): " + uriUpdateDuration);
+			bw.write("\n");
+			bw.write("    Add Collection Time (in sec): " + addTopDuration);
+			bw.write("\n");
+			bw.write("    Add Annotations Time (in sec): " + annotateDuration);
+			bw.write("\n");
+			bw.write("libSBOLj (%): " + emulateDuration / submitDuration * 100);
+			bw.write("\n");
+			bw.close();
+		}
 		return doc;
 	}
 	
