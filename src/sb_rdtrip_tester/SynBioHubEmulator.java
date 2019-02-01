@@ -345,6 +345,7 @@ public class SynBioHubEmulator {
 		doc.setCreateDefaults(create_default);
 		
 		//SBOLReader.setKeepGoing(true);
+		SBOLReader.setURIPrefix(prefix);
 		doc = SBOLReader.read(file_to_read.getAbsolutePath());
 		//doc.read(file_to_read.getAbsolutePath());
 	
