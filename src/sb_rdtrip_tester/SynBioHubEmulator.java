@@ -268,6 +268,9 @@ public class SynBioHubEmulator {
 							class_type.equals("Agent") || class_type.equals("Plan")) {
 						identified.createAnnotation(new QName("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "type", "rdf"),
 								new URI("http://www.w3.org/ns/prov#" + class_type));
+					} if (class_type.equals("Measure")) {
+						identified.createAnnotation(new QName("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "type", "rdf"),
+								new URI("http://www.ontology-of-units-of-measure.org/resource/om-2/" + class_type));
 					} else {
 						identified.createAnnotation(new QName("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "type", "rdf"),
 								new URI("http://sbols.org/v2#" + class_type));
