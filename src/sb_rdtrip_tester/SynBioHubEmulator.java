@@ -75,15 +75,20 @@ public class SynBioHubEmulator {
 			bw = new BufferedWriter(new FileWriter(timing));
 		}
 		//create an instance of SBH and login
+		System.out.println("Connecting to SynBioHub");
 		if(initialize_SBH_Frontend(config.get_url(), config.get_prefix(), config.get_email(), config.get_pass()))
 		{
 			//read in the input file as an SBOLDocument to submit to SBH
+			
+			System.out.println("Reading file");
 			create_design(config.get_prefix(), input_file, config.get_complete(), config.get_defaults());
 			
 			submitStartTime = System.currentTimeMillis();
+			System.out.println("Submitting file");
 			// submit document to SBH
 			hub.createCollection(config.get_id(), config.get_version(), config.get_name(), config.get_desc(), "", true, doc);
 			
+			System.out.println("File submitted.");
 			submitEndTime = System.currentTimeMillis();
 			submitDuration = (submitEndTime - submitStartTime) * 1.0 / 1000;
 
@@ -91,9 +96,11 @@ public class SynBioHubEmulator {
 				bw.write("Submit Time (in sec): " + submitDuration);
 				bw.write("\n");
 			}
+			System.out.println("Fetching file");
 			retrieveStartTime = System.currentTimeMillis();
 			//retrieve uploaded document from SBH
 			retrievedDoc = hub.getSBOL(config.get_TP_col());
+			System.out.println("Fetched file");
 			
 			retrieveEndTime = System.currentTimeMillis();
 			retrieveDuration = (retrieveEndTime - retrieveStartTime) * 1.0 / 1000;
