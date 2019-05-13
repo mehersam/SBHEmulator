@@ -75,35 +75,29 @@ public class SynBioHubEmulator {
 			bw = new BufferedWriter(new FileWriter(timing));
 		}
 		//create an instance of SBH and login
-		System.out.println("Connecting to SynBioHub");
 		if(initialize_SBH_Frontend(config.get_url(), config.get_prefix(), config.get_email(), config.get_pass()))
 		{
 			//read in the input file as an SBOLDocument to submit to SBH
 			
-			System.out.println("Reading file");
 			create_design(config.get_prefix(), input_file, config.get_complete(), config.get_defaults());
 			
 			submitStartTime = System.currentTimeMillis();
-			System.out.println("Submitting file");
 			// submit document to SBH
 			hub.createCollection(config.get_id(), config.get_version(), config.get_name(), config.get_desc(), "", true, doc);
-			
-			System.out.println("File submitted.");
 			submitEndTime = System.currentTimeMillis();
 			submitDuration = (submitEndTime - submitStartTime) * 1.0 / 1000;
-
+			System.out.println("Submit Time (in sec): " + submitDuration);
 			if (bw!=null){
 				bw.write("Submit Time (in sec): " + submitDuration);
 				bw.write("\n");
 			}
-			System.out.println("Fetching file");
+
 			retrieveStartTime = System.currentTimeMillis();
 			//retrieve uploaded document from SBH
 			retrievedDoc = hub.getSBOL(config.get_TP_col());
-			System.out.println("Fetched file");
-			
 			retrieveEndTime = System.currentTimeMillis();
 			retrieveDuration = (retrieveEndTime - retrieveStartTime) * 1.0 / 1000;
+			System.out.println("Doc Retrieval Time (in sec): " + retrieveDuration);
 			if (bw!=null) {
 				bw.write("Doc Retrieval Time (in sec): " + retrieveDuration);
 				bw.write("\n");
@@ -138,6 +132,12 @@ public class SynBioHubEmulator {
 		//attempt to emulate the changes 
 		doc = emulator(doc, newPrefix, config.get_TP_col());
 		doc = ack_changes(doc, retrieveDoc(), newPrefix, config.get_TP_col());
+		System.out.println("Emulation Time (in sec): " + emulateDuration);
+		System.out.println("    Remove Time (in sec): " + removeDuration);
+		System.out.println("    Change URI Prefix Time (in sec): " + uriUpdateDuration);
+		System.out.println("    Add Collection Time (in sec): " + addTopDuration);
+		System.out.println("    Add Annotations Time (in sec): " + annotateDuration);
+		System.out.println("libSBOLj (%): " + emulateDuration / submitDuration * 100);
 		if (bw!=null) {
 			bw.write("Emulation Time (in sec): " + emulateDuration);
 			bw.write("\n");
@@ -262,9 +262,19 @@ public class SynBioHubEmulator {
 
 					addTopLevelToNestedAnnotations(topLevel, identified.getAnnotations());
 
+					Annotation annotation = identified.getAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "ownedBy", "sbh"));
+					if (annotation != null) {
+						identified.removeAnnotation(annotation);
+					}
+
 					identified.createAnnotation(
 							new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "ownedBy", "sbh"),
 							new URI(ownedByURI));
+					
+					annotation = identified.getAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "topLevel", "sbh"));
+					if (annotation != null) {
+						identified.removeAnnotation(annotation);
+					}
 
 					identified.createAnnotation(
 							new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "topLevel", "sbh"),
@@ -316,6 +326,11 @@ public class SynBioHubEmulator {
 			if (annotation.isNestedAnnotations()) {
 				List<Annotation> nestedAnnotations = annotation.getAnnotations();
 				addTopLevelToNestedAnnotations(topLevel, nestedAnnotations);
+				for (Annotation nestedAnnotation : nestedAnnotations) {
+					if (nestedAnnotation.getQName().equals(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "topLevel", "sbh"))) {
+						nestedAnnotations.remove(nestedAnnotation);
+					}
+				}
 				nestedAnnotations.add(
 						new Annotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "topLevel", "sbh"),
 								topLevel.getIdentity()));

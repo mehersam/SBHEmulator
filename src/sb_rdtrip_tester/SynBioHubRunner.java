@@ -50,7 +50,5 @@ public class SynBioHubRunner {
 			e.printStackTrace();
             System.exit(1);
 		}
-		
-		System.out.println("Finished."); 
 	}
 }
